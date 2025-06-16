@@ -2,6 +2,7 @@ package epita.conception.projet.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -53,17 +54,29 @@ public class Capteur {
         return valeurs;
     }
 
+    // empty constructor
     public Capteur()
     {
-        this.valeurs = new ArrayList<>();   
+        this.valeurs = new ArrayList<>();
     }
 
+    // regular constructor
+    public Capteur(String name, String type)
+    {
+        this.id = UUID.randomUUID().toString();
+        this.name = name;
+        this.type = type;
+        this.valeurs = new ArrayList<>();
+    }
+
+    // copy constructor
     public Capteur(String id, String name, String type, List<Valeur> valeurs)
     {
         this.id = id;
         this.name = name;
         this.type = type;
-        this.valeurs = new ArrayList<>();
+        this.valeurs = valeurs;
     }
+
 }
 

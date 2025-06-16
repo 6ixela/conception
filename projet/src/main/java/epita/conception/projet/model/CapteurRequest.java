@@ -2,40 +2,14 @@ package epita.conception.projet.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+@Document(collection = "capteurs")
 public class CapteurRequest {
-
-    private String name;
-    private String type;
-
-    public String getName()
-    {
-        return name;
-    }
-    
-    public void setName(String Name)
-    {
-        this.name = name;
-    }
-
-    public String getType()
-    {
-        return type;
-    }
-
-    public void setType(String type)
-    {
-        this.type = type;
-    }
-
-    public CapteurRequest()
-    { 
-    }
-
-    public CapteurRequest(String name, String type)
-    {
-        this.name = name;
-        this.type = type;
-    }
+    @Id
+    public String name;
+    public String type;
 }
-

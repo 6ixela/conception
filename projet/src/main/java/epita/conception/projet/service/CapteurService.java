@@ -45,6 +45,12 @@ public class CapteurService {
                 .orElse(null);
     }
 
+    public List<Capteur> getCapteursByType(String type) {
+        return repository.findAll().stream()
+                .filter(capteur -> capteur.getType().equals(type))
+                .toList();
+    }
+
     public Valeur getPremiereValeur(String id) {
         return getCapteurById(id)
                 .orElseThrow(() -> new RuntimeException("Capteur non trouvé"))

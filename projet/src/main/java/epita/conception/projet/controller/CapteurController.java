@@ -10,12 +10,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import epita.conception.projet.model.Capteur;
+import epita.conception.projet.model.CapteurRequest;
 import epita.conception.projet.model.Valeur;
 import epita.conception.projet.service.CapteurService;
 
 
 @RestController
-@RequestMapping("/Sensor")
+@RequestMapping("/sensor")
 public class CapteurController {
 
     @Autowired
@@ -36,23 +37,30 @@ public class CapteurController {
         }
     }
 
-    @PostMapping
-    public Capteur create(@RequestBody Capteur capteur) {
-        return service.addCapteur(capteur);
+    @GetMapping("type/{type}")
+    public List<Capteur> getByType(@PathVariable String type)
+    {
+        return service.getCapteursByType(type);   
     }
 
-    @PostMapping("/{id}/valeurs")
+    @PostMapping
+    public Capteur create(@RequestBody  CapteurRequest request) {
+        Capteur res = new Capteur(request.name, request.type);
+        return service.addCapteur(res);
+    }
+
+    @PostMapping("/{id}/value")
     public Capteur addValeur(@PathVariable String id, @RequestBody Valeur valeur) {
         return service.addValeur(id, valeur);
     }
 
-    @GetMapping("/{id}/valeurs/derniere")
-    public Valeur getDerniere(@PathVariable String id) {
+    @GetMapping("/{id}/value/laas")
+    public Valeur getLastValue(@PathVariable String id) {
         return service.getDerniereValeur(id);
     }
 
-    @GetMapping("/{id}/valeurs/premiere")
-    public Valeur getPremiere(@PathVariable String id) {
+    @GetMapping("/{id}/value/first")
+    public Valeur getFirstValue(@PathVariable String id) {
         return service.getPremiereValeur(id);
     }
 }
