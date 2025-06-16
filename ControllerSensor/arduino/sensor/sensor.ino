@@ -1,3 +1,6 @@
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WiFi.h>
+
 #include <Wire.h>
 #include "rgb_lcd.h"
 #include "Grove_Temperature_And_Humidity_Sensor.h"
@@ -12,9 +15,11 @@
 
 #define HIMIDITY_THRESHOLD 70
 #define TEMP_LOW_THRESHOLD 20
-#define TEMP_HIGHT_THRESHOLD 30
+#define TEMP_HIGHT_THRESHOLD 27
 #define LUMINOSITY_THRESHOLD 2000
 #define BUTTON_PIN D7
+
+const char* HOST =  "http://jigsaw.w3.org/HTTP/connection.html";
 
 DHT dht(DHTPIN, DHTTYPE);
 rgb_lcd lcd;
@@ -22,26 +27,23 @@ Si115X si1151;
 ChainableLED leds(LED1, LED2, 1);
 
 
-#if defined(ARDUINO_ARCH_AVR)
-    #define debug  Serial
+//const char* ssid = "Nerv02-bridge";
+//const char* password = "projetIOT";
 
-#elif defined(ARDUINO_ARCH_SAMD) ||  defined(ARDUINO_ARCH_SAM)
-#ifdef SerialUSB
-    #define debug  SerialUSB
-#else
-    #define debug  Serial
-#endif
-#else
-    #define debug  Serial
-#endif
+// const char* ssid = "xiaomi11T";
+// const char* password = "alexisss";
 
-bool led_on = true;
+#define SECRET_WIFI_SSID "iphone-aurelien"
+#define SECRET_WIFI_PASS "Marson2019"
+
+bool led_off = true;
 int buttonState = 0; 
+String sensorReadings;
 
 void setup() {
     // print setup
-    debug.begin(115200);
-    debug.println("DHTxx test!");
+    Serial.begin(115200);
+    Serial.println("DHTxx test!");
     Wire.begin();
 
     // humidity / temp sensor
@@ -53,7 +55,7 @@ void setup() {
     // luminosity setup
     uint8_t conf[4];
 
-    // luminosity 
+    // luminosiled_ofty 
     Wire.begin();
     Serial.begin(115200);
     if (!si1151.Begin())
@@ -67,31 +69,61 @@ void setup() {
     // button
     pinMode(BUTTON_PIN, INPUT_PULLUP);
 
+
+    //wifi setUP
+    WiFi.begin(SECRET_WIFI_SSID, SECRET_WIFI_PASS);
+
+    int i = 0;
+    // waiting for wifi conection
+    while (WiFi.status() != WL_CONNECTED) {
+      delay(500);
+      Serial.println(WiFi.status());
+      if (i == 0)
+      {
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        //lcd.print("connection");
+      }
+      else
+      {
+        lcd.print(".");
+      }
+      i = (i +1) % 7;
+    }
+    //print a new line, then print WiFi connected and the IP address
+    lcd.setCursor(0, 0);
+    lcd.print("connected       ");
+    lcd.setCursor(0, 1);
+    lcd.print(WiFi.localIP());
+    delay(3000);
+    lcd.clear();
+    // Print the IP address
+    Serial.println(WiFi.localIP());
+
 }
 
 void loop() {
-
     buttonState = digitalRead(BUTTON_PIN);
     if (si1151.ReadHalfWord_VISIBLE() > LUMINOSITY_THRESHOLD) {
-      led_on = true;
+      led_off = true;
     }
     else
     {
-      led_on = false;
+      led_off = false;
     }
     if (buttonState == HIGH)
     {
-      led_on = true;
+      httpGETRequest(HOST);
+      //Serial.println(sensorReadings);
+      //JSONVar myObject = JSON.parse(sensorReadings);
+     
+      led_off = false;
     }
 
-    //button handeling
-
-
-    Serial.println("---humidity/Temp");
     float temp_hum_val[2] = {0};
     if (!dht.readTempAndHumidity(temp_hum_val)) {
 
-        if(led_on) {
+        if(led_off) {
             leds.setColorRGB(0, 0, 0, 0); 
         }
         else
@@ -108,11 +140,11 @@ void loop() {
         lcd.print("Temperature ");
         if (temp_hum_val[1] < TEMP_LOW_THRESHOLD) {
           lcd.setCursor(0, 1);
-          lcd.print("Basse");
+          lcd.print("Basse  ");
         }
         else if (temp_hum_val[1] > TEMP_HIGHT_THRESHOLD) {
           lcd.setCursor(0, 1);
-          lcd.print("Elevee");
+          lcd.print("Elevee ");
         }
         else {
           lcd.setCursor(0, 1);
@@ -120,10 +152,35 @@ void loop() {
         }
 
     } else {
-        debug.println("Failed to get temprature and humidity value.");
+        Serial.println("Failed to get temprature and humidity value.");
     }
 
     // glocal delay
     delay(500);
+}
+
+void httpGETRequest(const char* host) {
+
+    WiFiClient client;
+
+    HTTPClient http;
+
+  if (http.begin(client, host)) {
+    int httpCode = http.GET();
+    Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+    if (httpCode == HTTP_CODE_OK ||  httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+      String payload = http.getString();
+      Serial.println(payload);
+    }
+    else
+    {
+      Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+    }
+    http.end();
+  }
+  else
+  {
+    Serial.println("[HTTP] unable to connect");
+  }
 }
 
