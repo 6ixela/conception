@@ -9,6 +9,11 @@ public class Valeur {
     public Valeur() {
     }
 
+    public Valeur(Double valeur) {
+        this.date = LocalDateTime.now();
+        this.valeur = valeur;
+    }
+
     public Valeur(LocalDateTime date, Double valeur) {
         this.date = date;
         this.valeur = valeur;

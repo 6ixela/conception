@@ -2,6 +2,7 @@ package epita.conception.projet.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import epita.conception.projet.model.Capteur;
 import epita.conception.projet.model.CapteurRequest;
 import epita.conception.projet.model.Valeur;
+import epita.conception.projet.model.ValueRequest;
 import epita.conception.projet.service.CapteurService;
 
 
@@ -23,8 +25,8 @@ public class CapteurController {
     private CapteurService service;
 
     @GetMapping
-    public List<Capteur> getAll() {
-        return service.getAllCapteurs();
+    public ResponseEntity<List<Capteur>> getAll() {
+        return ResponseEntity.ok(service.getAllCapteurs());
     }
 
     @GetMapping("/{id}")
@@ -50,11 +52,13 @@ public class CapteurController {
     }
 
     @PostMapping("/{id}/value")
-    public Capteur addValeur(@PathVariable String id, @RequestBody Valeur valeur) {
-        return service.addValeur(id, valeur);
+    public Capteur addValeur(@PathVariable String id, @RequestBody ValueRequest valueRequest) {
+        Valeur value = new Valeur(valueRequest.value);
+        // check argument, if value is null, return invalid arg
+        return service.addValeur(id, value);
     }
 
-    @GetMapping("/{id}/value/laas")
+    @GetMapping("/{id}/value/last")
     public Valeur getLastValue(@PathVariable String id) {
         return service.getDerniereValeur(id);
     }
