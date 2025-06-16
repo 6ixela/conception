@@ -1,46 +1,56 @@
 package epita.conception.projet.service;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import epita.conception.projet.repository.SensorRepository;
+import epita.conception.projet.model.Capteur;
+import epita.conception.projet.model.Valeur;
+import epita.conception.projet.repository.CapteurRepository;
 
 @Service
 public class CapteurService {
 
     @Autowired
-    private SensorRepository sensorRepository;
-
-    @Autowired
-    private ValeurMesureeRepository valeurMesureeRepository;
+    private CapteurRepository repository;
 
     public List<Capteur> getAllCapteurs() {
-        return capteurRepository.findAll();
+        return repository.findAll();
     }
 
     public Optional<Capteur> getCapteurById(String id) {
-        return capteurRepository.findById(id);
+        return repository.findById(id);
     }
 
-    public Optional<ValeurMesuree> getDerniereValeurMesuree(String capteurId) {
-        List<ValeurMesuree> valeurs = valeurMesureeRepository.findByCapteurIdOrderByTimestampDesc(capteurId);
-        return valeurs.isEmpty() ? Optional.empty() : Optional.of(valeurs.get(0));
+    public Capteur addCapteur(Capteur capteur) {
+        return repository.save(capteur);
     }
 
-    public Optional<ValeurMesuree> getPlusAncienneValeurMesuree(String capteurId) {
-        List<ValeurMesuree> valeurs = valeurMesureeRepository.findByCapteurIdOrderByTimestampAsc(capteurId);
-        return valeurs.isEmpty() ? Optional.empty() : Optional.of(valeurs.get(0));
+    public Capteur addValeur(String capteurId, Valeur valeur) {
+        return repository.findById(capteurId).map(capteur -> {
+            capteur.getValeurs().add(valeur);
+            return repository.save(capteur);
+        }).orElseThrow(() -> new RuntimeException("Capteur non trouvé"));
     }
 
-    public Capteur ajouterCapteur(Capteur capteur) {
-        return capteurRepository.save(capteur);
+    public Valeur getDerniereValeur(String id) {
+        return getCapteurById(id)
+                .orElseThrow(() -> new RuntimeException("Capteur non trouvé"))
+                .getValeurs()
+                .stream()
+                .max(Comparator.comparing(Valeur::getDate))
+                .orElse(null);
     }
 
-    public ValeurMesuree ajouterValeurMesuree(String capteurId, double valeur) {
-        ValeurMesuree vm = new ValeurMesuree();
-        vm.setCapteurId(capteurId);
-        vm.setValeur(valeur);
-        vm.setTimestamp(new Date());
-        return valeurMesureeRepository.save(vm);
+    public Valeur getPremiereValeur(String id) {
+        return getCapteurById(id)
+                .orElseThrow(() -> new RuntimeException("Capteur non trouvé"))
+                .getValeurs()
+                .stream()
+                .min(Comparator.comparing(Valeur::getDate))
+                .orElse(null);
     }
 }
