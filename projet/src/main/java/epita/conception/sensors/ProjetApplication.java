@@ -1,4 +1,4 @@
-package epita.conception.projet;
+package epita.conception.sensors;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

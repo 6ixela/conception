@@ -1,4 +1,4 @@
-package epita.conception.projet.service;
+package epita.conception.sensors.service;
 
 import java.util.Comparator;
 import java.util.List;

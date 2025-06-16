@@ -1,4 +1,4 @@
-package epita.conception.projet.repository;
+package epita.conception.sensors.repository;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 

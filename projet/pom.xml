@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>epita.conception</groupId>
-	<artifactId>projet</artifactId>
+	<artifactId>sensors</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>projet</name>
 	<description>Demo project for Spring Boot</description>

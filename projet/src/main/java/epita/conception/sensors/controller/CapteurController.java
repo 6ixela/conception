@@ -1,4 +1,4 @@
-package epita.conception.projet.controller;
+package epita.conception.sensors.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;

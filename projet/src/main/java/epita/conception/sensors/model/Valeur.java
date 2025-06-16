@@ -1,4 +1,4 @@
-package epita.conception.projet.model;
+package epita.conception.sensors.model;
 
 import java.time.LocalDateTime;
 
