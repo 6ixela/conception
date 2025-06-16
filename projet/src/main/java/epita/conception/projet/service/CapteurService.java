@@ -33,13 +33,15 @@ public class CapteurService {
         return repository.findById(capteurId).map(capteur -> {
             capteur.getValeurs().add(valeur);
             return repository.save(capteur);
-        }).orElseThrow(() -> new RuntimeException("Capteur non trouvé"));
+        }).orElse(null);
     }
 
-    public Valeur getDerniereValeur(String id) {
-        return getCapteurById(id)
-                .orElseThrow(() -> new RuntimeException("Capteur non trouvé"))
-                .getValeurs()
+    public Valeur getLastValeur(String id) {
+        var capteur = getCapteurById(id).orElse(null);
+        if (capteur == null) {
+            return null;
+        }
+        return capteur.getValeurs()
                 .stream()
                 .max(Comparator.comparing(Valeur::getDate))
                 .orElse(null);
@@ -51,10 +53,12 @@ public class CapteurService {
                 .toList();
     }
 
-    public Valeur getPremiereValeur(String id) {
-        return getCapteurById(id)
-                .orElseThrow(() -> new RuntimeException("Capteur non trouvé"))
-                .getValeurs()
+    public Valeur getFirstValeur(String id) {
+        var capteur = getCapteurById(id).orElse(null);
+        if (capteur == null) {
+            return null;
+        }
+        return capteur.getValeurs()
                 .stream()
                 .min(Comparator.comparing(Valeur::getDate))
                 .orElse(null);

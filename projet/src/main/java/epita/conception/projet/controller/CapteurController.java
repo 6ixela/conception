@@ -30,41 +30,56 @@ public class CapteurController {
     }
 
     @GetMapping("/{id}")
-    public Capteur getById(@PathVariable String id) {
+    public ResponseEntity<Capteur> getById(@PathVariable String id) {
         var capteur =  service.getCapteurById(id);
         if (capteur.isPresent()) {
-            return capteur.get();
+            return ResponseEntity.ok(capteur.get());
         } else {
-            throw new RuntimeException("Capteur non trouvé");
+            return ResponseEntity.notFound().build();
         }
     }
 
     @GetMapping("type/{type}")
-    public List<Capteur> getByType(@PathVariable String type)
+    public ResponseEntity<List<Capteur>> getByType(@PathVariable String type)
     {
-        return service.getCapteursByType(type);   
+        return ResponseEntity.ok(service.getCapteursByType(type));   
     }
 
     @PostMapping
-    public Capteur create(@RequestBody  CapteurRequest request) {
+    public ResponseEntity<Capteur> create(@RequestBody  CapteurRequest request) {
         Capteur res = new Capteur(request.name, request.type);
-        return service.addCapteur(res);
+        if (request.name == null || request.type == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(service.addCapteur(res));
     }
 
     @PostMapping("/{id}/value")
-    public Capteur addValeur(@PathVariable String id, @RequestBody ValueRequest valueRequest) {
+    public ResponseEntity<Capteur> addValeur(@PathVariable String id, @RequestBody ValueRequest valueRequest) {
         Valeur value = new Valeur(valueRequest.value);
-        // check argument, if value is null, return invalid arg
-        return service.addValeur(id, value);
+        if (valueRequest.value == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(service.addValeur(id, value));
     }
 
     @GetMapping("/{id}/value/last")
-    public Valeur getLastValue(@PathVariable String id) {
-        return service.getDerniereValeur(id);
+    public ResponseEntity<Valeur> getLastValue(@PathVariable String id) {
+        var value = service.getLastValeur(id);
+        if (value == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        // check si le capteur existe
+        return ResponseEntity.ok(value);
     }
 
     @GetMapping("/{id}/value/first")
-    public Valeur getFirstValue(@PathVariable String id) {
-        return service.getPremiereValeur(id);
+    public ResponseEntity<Valeur> getFirstValue(@PathVariable String id) {
+        // check si le capteur existe
+        var value = service.getFirstValeur(id);
+        if (value == null) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(value);
     }
 }
