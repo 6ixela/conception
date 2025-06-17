@@ -10,11 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import epita.conception.projet.model.Capteur;
-import epita.conception.projet.model.CapteurRequest;
-import epita.conception.projet.model.Valeur;
-import epita.conception.projet.model.ValueRequest;
-import epita.conception.projet.service.CapteurService;
+import epita.conception.sensors.model.Capteur;
+import epita.conception.sensors.model.CapteurRequest;
+import epita.conception.sensors.model.Valeur;
+import epita.conception.sensors.model.ValueRequest;
+import epita.conception.sensors.service.CapteurService;
 
 
 @RestController

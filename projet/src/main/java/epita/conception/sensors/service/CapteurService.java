@@ -7,9 +7,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import epita.conception.projet.model.Capteur;
-import epita.conception.projet.model.Valeur;
-import epita.conception.projet.repository.CapteurRepository;
+import epita.conception.sensors.model.Capteur;
+import epita.conception.sensors.model.Valeur;
+import epita.conception.sensors.repository.CapteurRepository;
 
 @Service
 public class CapteurService {
