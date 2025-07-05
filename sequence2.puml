@@ -3,29 +3,36 @@
 
 collections WS_orchestrateur as wso
 collections WS_capteur as wsc
-participant Esp32 as esp
-boundary dispplay as di
+participant Esp8266 as esp
+boundary display as di
+boundary led as led
 
-group update deviceDB 
+group update device & apply Constraint
     wso -> wsc : get all capteurs
     wsc -> wso : capteur_list 
-    loop capteurs in capteur_list
-        alt if capteur refer to a new device
-            wsc -> wsc : append new device in DB
+    loop capteur in capteur_list
+        alt capteur not register in device's capteurs
+            wso -> wso : append new capteurs in Device
+        end
+
+        alt capteur type is lum & value < lum_threshold
+            wso -> esp : request activate led
+            esp -> led : activate led
+        else capteur type is lum & value > lum_threshold
+            wso -> esp : request deactivate led 
+            esp -> led : deactivate led
+        end
+
+        alt capteur type is humid & value < humid_threshold
+            wso -> esp : request display "vmc low speed"
+            esp -> di : update display content
+        else capteur type is humid & value > humid_threshold
+            wso -> esp : request display "vmc high speed"
+            esp -> di : update display content
         end
     end
 end
 
-loop for device in devices
-    loop for constrainte in device.constraint
-        wso -> wsc : get capteur value
-        wsc -> wso : value 
-        alt value is not in threshold 
-            wso -> esp : change display status (lcd / led)
-            esp -> di : change display value/status
-        end
-    end
-end
 
 
 

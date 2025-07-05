@@ -15,6 +15,13 @@ public class Device {
         this.activators = new ArrayList<>();
     }
 
+    public Device(String ip)
+    {
+        this.Ip = ip;
+        this.capteurs = new ArrayList<>();
+        this.activators = new ArrayList<>();
+    }
+
     // regular constructor
     public Device(String Ip, List<Activator> activators, List<Capteur> capteurs)
     {

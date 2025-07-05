@@ -7,6 +7,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,29 +17,43 @@ import java.util.concurrent.ConcurrentHashMap;
 @SpringBootApplication
 public class OrchestrateurApplication {
 
-    static public Map<String, Device> knowned_device = new ConcurrentHashMap<>();
+    static public Device device = new Device();
+    static public Double lum_threshold = 40.d;
+    static public Double humid_threshold = 50.d;
 
     public static void main(String[] args) {
         SpringApplication.run(OrchestrateurApplication.class, args);
 
         while (true)
         {
-            // update Activator
 
-            // update Sensors
+            // TODO get List of all sensor
+            List<Capteur> All_sensor = new LinkedList<>();
 
-            for (Device device : knowned_device.values()) {
-                for (Activator activator : device.activators) {
-                    // update value
+            for (Capteur sensor  : All_sensor)
+            {
+                if (device.capteurs.stream().noneMatch(capteur -> capteur.getId().equals(sensor.getId())))
+                {
+                    device.capteurs.add(sensor);
                 }
 
-                for (Capteur capteur : device.capteurs) {
-                    // update vaue
+                if (sensor.getType().equals("light") && sensor.getValeurs().getFirst().getValeur() < lum_threshold)
+                {
+                    // Send Request to ESP8266 to activate led
+                }
+                else if (sensor.getType().equals("light") && sensor.getValeurs().getFirst().getValeur() > lum_threshold)
+                {
+                    // Send Request to ESP8266 to deactivate led
                 }
 
-                // apply senario
-
-
+                if (sensor.getType().equals("humidity") && sensor.getValeurs().getFirst().getValeur() < humid_threshold)
+                {
+                    // Send Request to ESP8266 to display "vmc low speed"
+                }
+                else if (sensor.getType().equals("humidity") && sensor.getValeurs().getFirst().getValeur() > humid_threshold)
+                {
+                    // Send Request to ESP8266 to display "vmc high speed"
+                }
             }
             
             try {
