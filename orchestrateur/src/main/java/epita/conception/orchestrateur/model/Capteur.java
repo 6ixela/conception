@@ -1,27 +1,21 @@
-package epita.conception.sensors.model;
+package epita.conception.orchestrateur.model;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-
-@Document(collection = "capteurs")
 public class Capteur {
-    @Id
     private String id;
     private String name;
     private String type;
     private String HostIp;
     private List<Valeur> valeurs = new ArrayList<>();
 
-    
     public String getId()
     {
         return id;
     }
-    
+
     public void setId(String id)
     {
         this.id = id;
@@ -31,7 +25,7 @@ public class Capteur {
     {
         return name;
     }
-    
+
     public void setName(String Name)
     {
         this.name = name;
@@ -50,7 +44,7 @@ public class Capteur {
     public void setValeurs(List<Valeur> valeurs) {
         this.valeurs = valeurs;
     }
-    
+
     public List<Valeur> getValeurs() {
         return valeurs;
     }
@@ -90,4 +84,3 @@ public class Capteur {
     }
 
 }
-

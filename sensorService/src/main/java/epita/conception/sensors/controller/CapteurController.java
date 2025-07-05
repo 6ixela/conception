@@ -47,7 +47,7 @@ public class CapteurController {
 
     @PostMapping
     public ResponseEntity<Capteur> create(@RequestBody  CapteurRequest request) {
-        Capteur res = new Capteur(request.name, request.type);
+        Capteur res = new Capteur(request.name, request.type, request.HostIp);
         if (request.name == null || request.type == null) {
             return ResponseEntity.badRequest().build();
         }

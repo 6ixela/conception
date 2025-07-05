@@ -1,0 +1,31 @@
+version: "3.8"
+
+services:
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - activateur-net
+
+  activateur-service:
+    build: .
+    container_name: activateur-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - mongodb
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://mongodb:27017/mon_activateur_db
+    networks:
+      - activateur-net
+
+volumes:
+  mongodb_data:
+
+networks:
+  activateur-net:

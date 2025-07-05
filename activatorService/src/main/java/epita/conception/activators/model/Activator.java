@@ -1,4 +1,4 @@
-package epita.conception.sensors.model;
+package epita.conception.activators.model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,15 +7,15 @@ import java.util.UUID;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+
 @Document(collection = "capteurs")
-public class Capteur {
+public class Activator {
     @Id
     private String id;
     private String name;
     private String type;
-    private String HostIp;
-    private List<Valeur> valeurs = new ArrayList<>();
-
+    private ActivatorState state;
+    private String content;
     
     public String getId()
     {
@@ -47,46 +47,38 @@ public class Capteur {
         this.type = type;
     }
 
-    public void setValeurs(List<Valeur> valeurs) {
-        this.valeurs = valeurs;
-    }
-    
-    public List<Valeur> getValeurs() {
-        return valeurs;
-    }
+    public void setState(ActivatorState state) { this.state = state; }
 
-    public void setHostIp(String valeur) {
-        HostIp = valeur;
-    }
+    public ActivatorState getState() { return state; }
 
-    public String getHostIp() {
-        return HostIp;
-    }
+    public void setContent(String content) { this.content = content; }
+
+    public String getContent() { return content; }
+
 
     // empty constructor
-    public Capteur()
+    public Activator()
     {
-        this.valeurs = new ArrayList<>();
     }
 
     // regular constructor
-    public Capteur(String name, String type, String HostIp)
+    public Activator(String name, String type)
     {
         this.id = UUID.randomUUID().toString();
         this.name = name;
         this.type = type;
-        this.HostIp = HostIp;
-        this.valeurs = new ArrayList<>();
+        this.state = ActivatorState.OFF ;
+        this.content = "";
     }
 
     // copy constructor
-    public Capteur(String id, String name, String type, String HostIp, List<Valeur> valeurs)
+    public Activator(String id, String name, String type, ActivatorState state, String content)
     {
         this.id = id;
         this.name = name;
         this.type = type;
-        this.HostIp = HostIp;
-        this.valeurs = valeurs;
+        this.state = state;
+        this.content = content;
     }
 
 }
