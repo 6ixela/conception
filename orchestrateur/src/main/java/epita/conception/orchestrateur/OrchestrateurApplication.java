@@ -1,6 +1,5 @@
 package epita.conception.orchestrateur;
 
-import epita.conception.orchestrateur.model.Activator;
 import epita.conception.orchestrateur.model.Capteur;
 import epita.conception.orchestrateur.model.Device;
 import org.springframework.boot.SpringApplication;
@@ -9,8 +8,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 
 @EnableDiscoveryClient
