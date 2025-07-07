@@ -1,5 +1,7 @@
 package epita.conception.orchestrateur.model;
 
+import java.util.UUID;
+
 public class Activator {
     private String id;
     private String name;

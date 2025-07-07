@@ -1,6 +1,6 @@
 version: '3.9'
 
-services:
+servicées:
 
   eureka-server:
     build:
@@ -37,19 +37,19 @@ services:
     networks:
       - capteur-net
 
-  # actionneur-service:
-  #   build:
-  #     context: ./actionneur-service
-  #     dockerfile: Dockerfile
-  #   container_name: actionneur
-  #   ports:
-  #     - "8083:8083"
-  #   depends_on:
-  #     - eureka-server
-  #   environment:
-  #     - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
-  #   networks:
-  #     - domotique-net
+  actionneur-service:
+    build:
+      context: ./activatorService
+      dockerfile: Dockerfile
+    container_name: actionneur
+    ports:
+      - "8083:8083"
+    depends_on:
+      - eureka-server
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+    networks:
+      - domotique-net
 
   orchestrateur-service:
     build:
@@ -61,7 +61,7 @@ services:
     depends_on:
       - eureka-server
       - capteur-service
-      # - actionneur-service
+      - actionneur-service
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
     networks:
