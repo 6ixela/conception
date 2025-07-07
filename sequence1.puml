@@ -1,0 +1,21 @@
+@@startuml senario_lecture_temperature
+
+
+participant Esp32 as esp
+boundary Capteur_temp as ct
+collections WS_capteur as wsc
+database MongoDB as mdb
+
+activate esp
+esp -> ct : read value
+ct -> esp : value
+
+esp -> wsc : send new value
+activate wsc
+wsc -> mdb : store new value
+activate mdb
+mdb -> wsc : ack
+deactivate mdb
+deactivate wsc
+
+@@enduml

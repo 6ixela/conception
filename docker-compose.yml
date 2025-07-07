@@ -1,0 +1,77 @@
+version: '3.9'
+
+services:
+
+  eureka-server:
+    build:
+      context: ./eurekaServeur
+      dockerfile: Dockerfile
+    container_name: eureka
+    ports:
+      - "8761:8761"
+    networks:
+      - domotique-net
+
+  capteur-service:
+    build:
+      context: ./sensorService
+      dockerfile: Dockerfile
+    container_name: capteur
+    ports:
+      - "8082:8082"
+    depends_on:
+      - eureka-server
+      - mongodb
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+    networks:
+      - domotique-net
+      - capteur-net
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - capteur-net
+
+  # actionneur-service:
+  #   build:
+  #     context: ./actionneur-service
+  #     dockerfile: Dockerfile
+  #   container_name: actionneur
+  #   ports:
+  #     - "8083:8083"
+  #   depends_on:
+  #     - eureka-server
+  #   environment:
+  #     - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+  #   networks:
+  #     - domotique-net
+
+  orchestrateur-service:
+    build:
+      context: ./orchestrateur
+      dockerfile: Dockerfile
+    container_name: orchestrateur
+    ports:
+      - "8081:8081"
+    depends_on:
+      - eureka-server
+      - capteur-service
+      # - actionneur-service
+    environment:
+      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka:8761/eureka
+    networks:
+      - domotique-net
+
+networks:
+  domotique-net:
+    driver: bridge
+  capteur-net:
+
+
+volumes:
+  mongodb_data:

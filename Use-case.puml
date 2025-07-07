@@ -1,0 +1,106 @@
+@@startuml
+
+left to right direction
+
+actor user
+
+actor Capteur_Temperature as ct
+actor Capteur_Lumière as cl
+actor Capteur_Humidité as ch
+
+actor Ecran as e
+actor led as l
+actor Bouton as b
+
+skinparam legend {
+  backgroundColor #GhostWhite
+  entrySeparator #GhostWhite
+}
+
+legend top left 
+   <#GhostWhite,#GhostWhite>| |=                            __Légende__ |
+   |<#red>         | traitement d'information relatif au capteurs |
+   |<#MediumBlue>| traitement d'information relatif au actioneurs |
+endlegend
+
+package ESP32 {
+    package capteurs #APPLICATION;line:MediumBlue {
+        
+        usecase lire_temp as u1 #line.bold:MediumBlue
+        usecase lire_lum as u2 #line.bold:MediumBlue
+        usecase lire_humid as u3 #line.bold:MediumBlue
+        usecase envoiller_notification_temp as u4 #line.bold:MediumBlue
+        usecase envoiller_notification_lum as u5 #line.bold:MediumBlue
+        usecase envoiller_notification_humid as u6 #line.bold:MediumBlue
+    }
+
+    package actioneurs #LightPink;line:red {
+        usecase ecrire_ecran as u7 #line.bold:red
+        usecase activer_led as u8 #line.bold:red
+        usecase desactiver_led as u9 #line.bold:red
+
+        usecase envoiller_notification_button as u17 #line.bold:red
+        usecase lire_button_state as u18 #line.bold:red
+    }
+
+}
+
+package WebService {
+    package Capteurs {
+        usecase recevoir_notfication_capteur as u10 #APPLICATION;line.bold:MediumBlue
+        usecase stocker_valeur_capteur as u11 #APPLICATION;line.bold:MediumBlue
+    }
+    
+    package Actioneurs {
+        usecase renvoiller_modification_actioneur as u12 #LightPink;line.bold:red
+        usecase stocker_valeur_actioner as u14 #LightPink;line.bold:red
+        usecase recevoir_notfication_actioneur as u13 #LightPink;line.bold:red
+    }
+    
+    package ordonanceur {
+        usecase executer_les_routines as u15
+    }
+
+    usecase monitorer_application as u16
+}
+
+user -- u16 
+
+u16 -- u11
+u16 -- u14
+
+u15 <.. u12 : "<<extend>>"
+u15 - u11
+u15 - u14
+u14 -- u13 #line.bold:red
+u11 -- u10 #line.bold:MediumBlue
+
+u10 <--- u4 #line.bold:MediumBlue
+u10 <--- u6 #line.bold:MediumBlue
+u10 <--- u5 #line.bold:MediumBlue
+
+u12 ...> u7 #LightPink;line.bold:red
+u12 ...> u8 #LightPink;line.bold:red
+u12 ...> u9 #LightPink;line.bold:red
+
+u4 <.. u1 #line:MediumBlue : "<<include>>"
+u5 <.. u2 #line:MediumBlue : "<<include>>"
+u6 <.. u3 #line:MediumBlue : "<<include>>"
+
+u1 -- ct #line.bold:MediumBlue
+u2 -- cl #line.bold:MediumBlue
+u3 -- ch #line.bold:MediumBlue
+
+
+u7 --- e #LightPink;line.bold:red
+u8 --- l #LightPink;line.bold:red
+u9 --- l #LightPink;line.bold:red
+
+u13 -- u17 #LightPink;line.bold:red
+
+u17 <.. u18 #LightPink;line:red : "<<include>>"
+u18 -- b   #LightPink;line.bold:red
+
+
+
+@@enduml
