@@ -19,7 +19,9 @@
 #define LUMINOSITY_THRESHOLD 2000
 #define BUTTON_PIN D7
 
-const char* HOST =  "http://192.168.1.106:8080/sensor";
+const char* HOST =  "http://192.168.1.106:8082/";
+const char* HOST_SENSOR = "http://192.168.1.106:8082/sensor";
+const char* HOST_LISTEN = "http://192.168.1.106:8082/ord";
 
 DHT dht(DHTPIN, DHTTYPE);
 rgb_lcd lcd;
@@ -37,10 +39,13 @@ ChainableLED leds(LED1, LED2, 1);
 #define SECRET_WIFI_PASS "epita2024"
 
 bool led_off = true;
-int buttonState = 0; 
+int buttonState = 0;
 String sensorReadings;
 bool send_request = true;
-
+int led_red   = 0;
+int led_green = 0;
+int led_bleu  = 0;
+String temperature_status = "Normale";
 
 void setup() {
     // print setup
@@ -50,13 +55,10 @@ void setup() {
 
     // humidity / temp sensor
     dht.begin();
-
     // set up the LCD's number of columns and rows:
     lcd.begin(16, 2);
-    
     // luminosity setup
     uint8_t conf[4];
-
     // luminosiled_ofty 
     Wire.begin();
     Serial.begin(115200);
@@ -67,16 +69,13 @@ void setup() {
 
     // led init
     leds.init();
-
     // button
     pinMode(BUTTON_PIN, INPUT_PULLUP);
-
-
     //wifi setUP
     WiFi.begin(SECRET_WIFI_SSID, SECRET_WIFI_PASS);
 
-    int i = 0;
     // waiting for wifi conection
+    int i = 0;
     while (WiFi.status() != WL_CONNECTED) {
       delay(500);
       Serial.println(WiFi.status());
@@ -84,7 +83,7 @@ void setup() {
       {
         lcd.clear();
         lcd.setCursor(0, 0);
-        //lcd.print("connection");
+        lcd.print("connection");
       }
       else
       {
@@ -99,70 +98,46 @@ void setup() {
     lcd.print(WiFi.localIP());
     delay(3000);
     lcd.clear();
-    // Print the IP address
     Serial.println(WiFi.localIP());
+
+    // register sensor to webserver
+    String light = httpPOSTRequest(HOST_SENSOR, "{\"name\":\"light_1\",\"type\"=\"light\"}");
+    String humid = httpPOSTRequest(HOST_SENSOR, "{\"name\":\"humidity_1\",\"type\"=\"humidity\"}");
+    String temp  = httpPOSTRequest(HOST_SENSOR, "{\"name\":\"temp_1\",\"type\"=\"temperature\"}");
+
+    Serial.println(light);
+    Serial.println(humid);
+    Serial.println(temp);
 
 }
 
 void loop() {
+    // get new button state
     buttonState = digitalRead(BUTTON_PIN);
-    if (si1151.ReadHalfWord_VISIBLE() > LUMINOSITY_THRESHOLD) {
-      led_off = true;
-    }
-    else
-    {
-      led_off = false;
-    }
+    // get new sensor values
+    int light_value  = si1151.ReadHalfWord_VISIBLE();
+    float temp_hum_val[2] = {0};
+    dht.readTempAndHumidity(temp_hum_val);
+
+    // handle button push
     if (buttonState == HIGH)
     {
-      // if (!send_request)
-      // {
-      //   httpPOSTRequest(HOST, "{\"name\":\"TKTFrèreCESPquifaitCA\",\"type\":\"caca\"}");
-      // }
-      send_request = true;
-      led_off = false;
+      //leds.setColorRGB(0, led_red, led_green, led_bleu);  
     }
-    else
-    {
-      send_request = false;
-    }
+    // refresh lcd display
+    lcd.setCursor(0, 0);
+    lcd.print("Temperature ");
+    lcd.setCursor(0, 1);
+    lcd.print(temperature_status);
+    lcd.print(" ");
+    lcd.print(temp_hum_val[1]);
+    lcd.print("C*");
 
-    float temp_hum_val[2] = {0};
-    if (!dht.readTempAndHumidity(temp_hum_val)) {
+    // send new info to server
 
-        if(led_off) {
-            leds.setColorRGB(0, 0, 0, 0); 
-        }
-        else
-        {
-            if (temp_hum_val[0] > HIMIDITY_THRESHOLD) {
-              leds.setColorRGB(0, 255, 0, 0);  
-            }
-            else {
-                leds.setColorRGB(0, 48, 255, 117);  
-            }
-        }  
+    // listen for request from ord
 
-        lcd.setCursor(0, 0);
-        lcd.print("Temperature ");
-        if (temp_hum_val[1] < TEMP_LOW_THRESHOLD) {
-          lcd.setCursor(0, 1);
-          lcd.print("Basse  ");
-        }
-        else if (temp_hum_val[1] > TEMP_HIGHT_THRESHOLD) {
-          lcd.setCursor(0, 1);
-          lcd.print("Elevee ");
-        }
-        else {
-          lcd.setCursor(0, 1);
-          lcd.print("Normale");
-        }
 
-    } else {
-        Serial.println("Failed to get temprature and humidity value.");
-    }
-
-    // glocal delay
     delay(500);
 }
 
@@ -171,26 +146,28 @@ void httpGETRequest(const char* host) {
 
     HTTPClient http;
 
-  if (http.begin(client, host)) {
-    int httpCode = http.GET();
-    Serial.printf("[HTTP] GET... code: %d\n", httpCode);
-    if (httpCode == HTTP_CODE_OK ||  httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
-      String payload = http.getString();
-      Serial.println(payload);
+    if (http.begin(client, host)) {
+      int httpCode = http.GET();
+      Serial.printf("[HTTP] GET... code: %d\n", httpCode);
+      if (httpCode == HTTP_CODE_OK ||  httpCode == HTTP_CODE_MOVED_PERMANENTLY) {
+        String payload = http.getString();
+        Serial.println(payload);
+      }
+      else
+      {
+        Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      }
+      http.end();
     }
     else
     {
-      Serial.printf("[HTTP] GET... failed, error: %s\n", http.errorToString(httpCode).c_str());
+      Serial.println("[HTTP]{GET} unable to connect");
     }
-    http.end();
-  }
-  else
-  {
-    Serial.println("[HTTP]{GET} unable to connect");
-  }
 }
 
-void httpPOSTRequest(const char* host, const char* body) {
+String httpPOSTRequest(const char* host, const char* body) {
+
+    String res = "none";
 
     WiFiClient client;
     HTTPClient http;
@@ -208,12 +185,36 @@ void httpPOSTRequest(const char* host, const char* body) {
         Serial.println("received payload:\n<<");
         Serial.println(payload);
         Serial.println(">>");
+        res = payload;
       }
     } else {
       Serial.printf("[HTTP] POST... failed, error: %s\n", http.errorToString(httpCode).c_str());
     }
 
     http.end();
+    return res;
+}
 
+void ListenOn(const char* host)
+{
+    WiFiClient client;
+
+    HTTPClient http;
+
+    if (http.begin(client, host)) {
+
+      Serial.printf("currnet hots = %d\n", client.available());
+      if (client) {
+        String s = client.readStringUntil('\n');  // read the message incoming from one of the clients
+        s.trim();                                 // trim eventual \r
+        Serial.println(s);                        // print the message to Serial Monitor
+        client.print("echo: ");                   // this is only for the sending client
+        //server.println(s);                        // send the message to all connected clients
+        //server.flush();    
+      }
+    }
+    else {q
+      Serial.print("[Listen] can't connect");
+    }
 }
 
